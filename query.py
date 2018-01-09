@@ -2,7 +2,7 @@ from CityCode import *
 import requests
 import os
 city_dict = None
-def main():
+def main(from_station,to_station,trip_date,purpose_codes):
     global city_dict
     city_url = "https://kyfw.12306.cn/otn/resources/js/framework/station_name.js?station_version=1.9042"
     file = "./file/城市代码.txt"
@@ -10,10 +10,10 @@ def main():
         city_dict = eval(readFile(file))
     else:
         city_dict = readCode(file,city_url)
-    from_station = input("请输入出发地城市名称:")
-    to_station = input("请输入目的地城市名称:")
-    trip_date = input("请输入出发时间格式为(xxxx-xx-xx):")
-    purpose_codes = input("请输入票的类型(ADULT/0X00,ADULT为普通票,0X00为学生票):")
+    # from_station = input("请输入出发地城市名称:")
+    # to_station = input("请输入目的地城市名称:")
+    # trip_date = input("请输入出发时间格式为(xxxx-xx-xx):")
+    # purpose_codes = input("请输入票的类型(ADULT/0X00,ADULT为普通票,0X00为学生票):")
     city_from_code = city_dict[from_station]
     city_to_code = city_dict[to_station]
     url = "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=%s"%(trip_date,city_from_code,city_to_code,purpose_codes)
@@ -22,7 +22,7 @@ def main():
     for item in result_list:
         print("=="*100)
         print(item)
-def query_train_info(url):
+def query_train_info(url,key_list,value_list):
     '''
     查询火车票信息：
     返回 信息查询列表
@@ -34,11 +34,11 @@ def query_train_info(url):
         # 获取返回的json数据里的data字段的result结果
         raw_trains = r.json()['data']['result']
         # print(len(raw_trains))
-        key_list = []
-        value_list = []
-        for key, value in city_dict.items():
-            key_list.append(key)
-            value_list.append(value)
+        # key_list = []
+        # value_list = []
+        # for key, value in city_dict.items():
+        #     key_list.append(key)
+        #     value_list.append(value)
         for raw_train in raw_trains:
             # 循环遍历每辆列车的信息
             data_list = raw_train.split('|')
@@ -77,13 +77,13 @@ def query_train_info(url):
                 no_seat = data_list[26]or '--'
                 # print(no_seat)
                 # 打印查询结果
-                info = ('车次:{} 出发站:{} 目的地:{} 出发时间:{} 到达时间:{} 消耗时间:{} 座位情况： 一等座：「{}」  二等座：「{}」 软卧：「{}」 硬卧：「{}」 硬座：「{}」 无座：「{}」  '.format(
+                info = [
                     train_no, from_station_name, to_station_name, start_time, arrive_time, time_fucked_up, first_class_seat,
-                    second_class_seat, soft_sleep, hard_sleep, hard_seat, no_seat))
+                    second_class_seat, soft_sleep, hard_sleep, hard_seat, no_seat]
                 info_list.append(info)
 
         return info_list
     except:
-        return ' 输出信息有误，请重新输入'
-if __name__ == '__main__':
-    main()
+        return '输出信息有误,请重新输入'
+# if __name__ == '__main__':
+#     main()
