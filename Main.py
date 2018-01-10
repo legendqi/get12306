@@ -1,6 +1,5 @@
 from UserPage import *
 import sys
-from query import *
 from PyQt5.QtWidgets import QApplication , QMainWindow
 if __name__ == '__main__':
     app = QApplication(sys.argv)

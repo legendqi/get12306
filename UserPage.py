@@ -6,59 +6,59 @@
 #
 # WARNING! All changes made in this file will be lost!
 import os
-# import requests
+import datetime
 import re
 
-import PyQt5
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QAbstractItemModel
 from PyQt5.QtCore import QAbstractListModel
 from PyQt5.QtCore import QDate
-from PyQt5.QtCore import QStringListModel
-from PyQt5.QtGui import QStandardItemModel
-# from PyQt5.QtGui import Qt.Orientation
-from PyQt5.QtWidgets import QHBoxLayout
-from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QTableWidget
-from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QTableWidgetItem
 
 from CityCode import readFile, readCode
+# from MyMessageBox import MyWindow
 from query import query_train_info
 
-trip_date = ""
+nowtime = datetime.datetime.now()
+nowtime_str = str(nowtime)
+nowtime_now = nowtime_str.split(" ")
+trip_date = nowtime_now[0]
 key_list = []
 value_list = []
 city_dict = {}
-class MyModel(QAbstractListModel):
-    def __init__(self, data):
-        super().__init__()
-        self.hexdata = data
-        print('__init__')
 
-    def data(self, index, role=None):
-        return self.hexdata[index.row()]
 
-    def rowCount(self, parent=None):
-        # print('rowCount')
-        return len(self.hexdata)
 
-    def roleNames(self):
-        # print('roleNames')
-        return 'lineData'
+class MyTable(QTableWidget):
+    """自定义的表格控件"""
+    def __init__(self, parent=None):
+        super(MyTable, self).__init__(parent)
+        self.setColumnCount(12)
+        self.setItem(0, 0, QTableWidgetItem(self.tr("车次")))
+        self.setItem(0, 1, QTableWidgetItem(self.tr("出发站")))
+        self.setItem(0, 2, QTableWidgetItem(self.tr("目的地")))
+        self.setItem(0, 3, QTableWidgetItem(self.tr("出发时间")))
+        self.setItem(0, 4, QTableWidgetItem(self.tr("到达时间")))
+        self.setItem(0, 5, QTableWidgetItem(self.tr("消耗时间")))
+        self.setItem(0, 6, QTableWidgetItem(self.tr("一等座")))
+        self.setItem(0, 7, QTableWidgetItem(self.tr("二等座")))
+        self.setItem(0, 8, QTableWidgetItem(self.tr("软卧")))
+        self.setItem(0, 9, QTableWidgetItem(self.tr("硬卧")))
+        self.setItem(0, 10, QTableWidgetItem(self.tr("硬座")))
+        self.setItem(0, 11, QTableWidgetItem(self.tr("无座")))
 
 class Ui_Form(object):
     def __init__(self):
         self.initDate()
     def setupUi(self, Form):
         Form.setObjectName("火车票查询")
-        # Form.setWindowTitle("火车票查询")
         Form.resize(1300, 650)
         #普通票单选框
         self.radio_adult = QtWidgets.QRadioButton(Form)
         self.radio_adult.setGeometry(QtCore.QRect(680, 40, 61, 22))
         self.radio_adult.setObjectName("radio_adult")
+        self.radio_adult.setChecked(True)
         #学生票单选框
         self.radio_student = QtWidgets.QRadioButton(Form)
         self.radio_student.setGeometry(QtCore.QRect(680, 90, 61, 22))
@@ -93,18 +93,17 @@ class Ui_Form(object):
         self.detailTable.setColumnCount(12)
         self.detailTable.setHorizontalHeaderLabels(
             ["车次", "出发站", "目的地", "出发时间", "到达时间", "消耗时间", "一等座", "二等座", "软卧", "硬卧", "硬座", "无座"])
-        self.detailTable.setGeometry(QtCore.QRect(10,250,1203,33))
+        self.detailTable.setGeometry(QtCore.QRect(35,250,1203,33))
         self.detailTable.geometry()
 
         #显示结果的list
-        self.result_list = QtWidgets.QListView(Form)
-        self.result_list.setGeometry(QtCore.QRect(10, 284, 1203, 341))
+        self.result_list = MyTable(Form)
+        self.result_list.setGeometry(QtCore.QRect(10, 284, 1243, 341))
         self.result_list.setObjectName("result_list")
         self.result_list.geometry()
         self.result_list.setUpdatesEnabled(True)
-        # self.list_mode = QStandardItemModel()
-        # self.result_list.setModel(QAbstractItemModel=)
-        # self.list_mode =QtWidgets.QListView.ListModel()
+        self.result_list.setColumnCount(12)
+
         #日历选择框
         self.calendar = QtWidgets.QCalendarWidget(Form)
         self.calendar.setGeometry(QtCore.QRect(140, 20, 481, 207))
@@ -150,8 +149,6 @@ class Ui_Form(object):
         # print(data_list[3])
         year = data_list[3]
         trip_date = year+"-"+month+"-"+day
-        # print(to_data)
-        # return to_data
 
     def initDate(self):
         global city_dict
@@ -175,42 +172,62 @@ class Ui_Form(object):
             purpose_codes = "ADULT"
         if self.radio_student.isChecked():
             purpose_codes = "0X00"
-
         if from_station in key_list and to_station in key_list and trip_date.strip()!="" and purpose_codes.strip()!="":
             from_station_code = city_dict[from_station]
             to_station_code = city_dict[to_station]
             query_url = self.getUrl(trip_date,from_station_code,to_station_code,purpose_codes)
-            result_list = query_train_info(query_url,key_list,value_list)
+            result_list_list = query_train_info(query_url,key_list,value_list)
 
 
-            mymodele = QListListModel(result_list)
-            self.result_list.item
-            self.result_list.setModel(mymodele)
-            for item in result_list:
-                print(item)
+
+            #打印查询结果
+            print(result_list_list)
+            self.result_list.setRowCount(len(result_list_list))
+            for i in range(len(result_list_list)):
+                for j in range(len(result_list_list[i])):
+                    twi1 = QTableWidgetItem(result_list_list[i][j])
+                    self.result_list.setItem(i, j, twi1)
         else:
             print("else ++++++++++++++++++++++++")
             if from_station not in key_list:
-                # self.msg("提醒","您输入的出发地不存在,请确认后重新输入").show()
+                print("输入的出发地不正确")
+                msg_box = MyWindow()
+                msg_box.msg("提示","您输入的出发点不存在,请确认后重新输入")
+                msg_box.show()
+            elif to_station not in key_list:
+                msg_box = MyWindow()
+                msg_box.msg("提示", "您输入的目的地不存在,请确认后重新输入")
+                msg_box.show()
+                # self.button_enter.clicked.connect(self.msg)
+            elif trip_date.strip() == "":
+                nowtime = datetime.datetime.now()
+                nowtime_str = str(nowtime)
+                nowtime_now = nowtime_str.split(" ")
+                trip_date = nowtime_now[0]
+                print(nowtime)
                 self.button_enter.clicked.connect(self.msg)
-            if to_station not in key_list:
-                # self.msg("提醒", "您输入的目的地不存在,请确认后重新输入").show()
-                self.button_enter.clicked.connect(self.msg)
-            if trip_date.strip() == "":
-                # self.msg("提醒", "您选择的日期有误,请重新选择").show()
-                self.button_enter.clicked.connect(self.msg)
-            if purpose_codes.strip() == "":
-                # self.msg("提醒", "请选择票的类型").show()
+            elif purpose_codes.strip() == "":
+                self.msg("提醒", "请选择票的类型")
                 self.button_enter.clicked.connect(self.msg)
             print(from_station+"================"+to_station)
     def getUrl(self,trip_date,city_from_code,city_to_code,purpose_codes):
-        url = "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=%s" % (
-        trip_date, city_from_code, city_to_code, purpose_codes)
+        url = "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=%s"%(trip_date, city_from_code, city_to_code, purpose_codes)
         return url
 
     def msg(self,title,message):
         reply = QMessageBox.information(QMessageBox.Warning,"提示","信息有误",QMessageBox.Yes | QMessageBox.No)
         return reply
+class MyWindow(QtWidgets.QWidget,Ui_Form):
+    """自定义的MessageBox"""
+    def __init__(self):
+        super(MyWindow, self).__init__()
+        self.myButton = QtWidgets.QPushButton(self)
+        self.myButton.setObjectName("myButton")
+        # self.myButton.setText(text)
+        self.myButton.clicked.connect(self.msg)
 
-
-# from kbuttongroup import KButtonGroup
+    def msg(self,title,message):
+        reply = QMessageBox.information(self,  # 使用infomation信息框
+                                        title,
+                                        message,
+                                        QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
