@@ -33,57 +33,55 @@ def query_train_info(url,key_list,value_list):
         r = requests.get(url, verify=False)
         # 获取返回的json数据里的data字段的result结果
         raw_trains = r.json()['data']['result']
-        # print(len(raw_trains))
-        # key_list = []
-        # value_list = []
-        # for key, value in city_dict.items():
-        #     key_list.append(key)
-        #     value_list.append(value)
-        for raw_train in raw_trains:
-            # 循环遍历每辆列车的信息
-            data_list = raw_train.split('|')
-            # print(len(data_list))
-            if len(data_list)>22:
+        if len(raw_trains)>0:
+            for raw_train in raw_trains:
+                # 循环遍历每辆列车的信息
+                data_list = raw_train.split('|')
                 # print(len(data_list))
-                # 车次号码
-                train_no = data_list[3]
-                # print("车次号码"+train_no)
-                # 出发站
-                from_station_code = data_list[6]
-                # print(from_station_code)
-                from_station_name = key_list[value_list.index(from_station_code)]
-                # print("出发地"+from_station_name)
-                # 终点站
-                to_station_code = data_list[7]
-                to_station_name = key_list[value_list.index(to_station_code)]
-                # 出发时间
-                start_time = data_list[8]
-                # 到达时间
-                arrive_time = data_list[9]
-                # 总耗时
-                time_fucked_up = data_list[10]
-                # print(time_fucked_up)
-                # 一等座
-                first_class_seat = data_list[31] or '--'
-                # 二等座
-                second_class_seat = data_list[30]or '--'
-                # 软卧
-                soft_sleep = data_list[23]or '--'
-                # 硬卧
-                hard_sleep = data_list[28]or '--'
-                # 硬座
-                hard_seat = data_list[29]or '--'
-                # 无座
-                no_seat = data_list[26]or '--'
-                # print(no_seat)
-                # 打印查询结果
-                info = [
-                    train_no, from_station_name, to_station_name, start_time, arrive_time, time_fucked_up, first_class_seat,
-                    second_class_seat, soft_sleep, hard_sleep, hard_seat, no_seat]
-                info_list.append(info)
+                if len(data_list)>22:
+                    # print(len(data_list))
+                    # 车次号码
+                    train_no = data_list[3]
+                    # print("车次号码"+train_no)
+                    # 出发站
+                    from_station_code = data_list[6]
+                    # print(from_station_code)
+                    from_station_name = key_list[value_list.index(from_station_code)]
+                    # print("出发地"+from_station_name)
+                    # 终点站
+                    to_station_code = data_list[7]
+                    to_station_name = key_list[value_list.index(to_station_code)]
+                    # 出发时间
+                    start_time = data_list[8]
+                    # 到达时间
+                    arrive_time = data_list[9]
+                    # 总耗时
+                    time_fucked_up = data_list[10]
+                    # print(time_fucked_up)
+                    # 一等座
+                    first_class_seat = data_list[31] or '--'
+                    # 二等座
+                    second_class_seat = data_list[30]or '--'
+                    # 软卧
+                    soft_sleep = data_list[23]or '--'
+                    # 硬卧
+                    hard_sleep = data_list[28]or '--'
+                    # 硬座
+                    hard_seat = data_list[29]or '--'
+                    # 无座
+                    no_seat = data_list[26]or '--'
+                    # print(no_seat)
+                    # 打印查询结果
+                    info = [
+                        train_no, from_station_name, to_station_name, start_time, arrive_time, time_fucked_up, first_class_seat,
+                        second_class_seat, soft_sleep, hard_sleep, hard_seat, no_seat]
+                    info_list.append(info)
 
         return info_list
     except:
-        return '输出信息有误,请重新输入'
+        return info_list
 # if __name__ == '__main__':
 #     main()
+
+#https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=2018-01-11&leftTicketDTO.from_station=SYT&leftTicketDTO.to_station=IEW&purpose_codes=ADULT
+#https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=2018-01-11&leftTicketDTO.from_station=SYT&leftTicketDTO.to_station=IEW&purpose_codes=ADULT
