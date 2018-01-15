@@ -176,10 +176,8 @@ class Ui_Form(object):
             from_station_code = city_dict[from_station]
             to_station_code = city_dict[to_station]
             query_url = self.getUrl(trip_date,from_station_code,to_station_code,purpose_codes)
+            print(query_url)
             result_list_list = query_train_info(query_url,key_list,value_list)
-
-
-
             #打印查询结果
             print(result_list_list)
             self.result_list.setRowCount(len(result_list_list))

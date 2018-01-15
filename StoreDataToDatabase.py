@@ -15,6 +15,133 @@ city_dict = {}
 key_list = []
 value_list = []
 trip_date = ""
+sichuan =  ["阿寨","埃岱","安德","安靖","广汉北","巴中",
+    "白果",
+    "白石岩",
+    "百里峡",
+    "柏村",
+    "碑木镇",
+    "彭山北",
+    "苍溪",
+    "朝天南",
+    "成都",
+    "达州",
+    "大山铺",
+    "大英东",
+    "代湾",
+    "德昌",
+    "德阳",
+    "都江堰",
+    "渡市",
+    "峨边",
+    "峨眉",
+    "峨眉山",
+    "尔赛河",
+    "甘洛",
+    "共和",
+    "关村坝",
+    "广安",
+    "广元",
+    "红光镇",
+    "汉源",
+    "红峰",
+    "花棚子",
+    "华蓥",
+    "简阳",
+    "简阳南",
+    "江油",
+    "金口河",
+    "敬梓场",
+    "青城山",
+    "开江",
+    "孔滩",
+    "拉白",
+    "拉鲊",
+    "阆中",
+    "乐山",
+    "乐武",
+    "乐跃",
+    "离堆公园",
+    "李市镇",
+    "联合乡",
+    "凉红",
+    "刘沟",
+    "隆昌",
+    "罗江东",
+    "毛坝",
+    "茅草坪",
+    "眉山",
+    "眉山东",
+    "米易",
+    "绵阳",
+    "冕宁",
+    "冕山",
+    "内江",
+    "南部",
+    "南充",
+    "南尔岗",
+    "尼波",
+    "尼日",
+    "攀枝花",
+    "彭州",
+    "蓬安",
+    "郫县",
+    "郫县西",
+    "平昌",
+    "蒲坝",
+    "普雄",
+    "青白江东",
+    "青莲",
+    "青神",
+    "渠县",
+    "三汇镇",
+    "沙马拉达",
+    "沙湾",
+    "上普雄",
+    "双凤驿",
+    "双流机场",
+    "双流西",
+    "苏雄",
+    "遂宁",
+    "铁口",
+    "铁西",
+    "桐子林",
+    "土溪",
+    "瓦祖",
+    "弯坵",
+    "万源",
+    "王场",
+    "武胜",
+    "西昌",
+    "犀浦",
+    "喜德",
+    "下普雄",
+    "小儿坪",
+    "谢家镇",
+    "新都东",
+    "新江",
+    "新津",
+    "新凉",
+    "宣汉",
+    "燕岗",
+    "杨漩",
+    "一步滩",
+    "宜宾",
+    "迤资",
+    "迎宾路",
+    "迎祥街",
+    "营山",
+    "永郎",
+    "俞冲",
+    "月华",
+    "岳池",
+    "越西",
+    "枣子林",
+    "轸溪",
+    "竹园坝",
+    "资阳",
+    "资中",
+    "自贡"]
 class MyThread(Thread):
     def __init__(self,from_station):
         Thread.__init__(self)
@@ -45,7 +172,7 @@ def insertData(conn,cursor,from_station):
                 print(result_list)
                 for item in result_list:
                     # writer.writerow({'车次': item[0], '出发点': item[1],'目的地':item[2],'开车时间':item[3],'到达时间':item[4],'消耗时间':item[5],'一等座':item[6],'二等座':item[7],'软卧':item[8], '硬卧':item[9], '硬座':item[10], '无座':item[11]})
-                    sql_command = 'insert into traines(carname,fromstation,tostation,fromtime,totime,taketime,firstseat,secondseat,softbed,hardbed,hardseat,noseat)values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\");'%(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11])
+                    sql_command = 'insert into trainticks(carname,fromstation,tostation,fromtime,totime,taketime,firstseat,secondseat,softbed,hardbed,hardseat,noseat)values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\");'%(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11])
                     print(sql_command)
                     try:
                         result = cursor.execute(sql_command)
@@ -100,16 +227,21 @@ def initDate():
 
 def main():
     global address
+    global sichuan
     # global conn
     # global cursor
     address = {'host':'localhost', 'user':"root", 'password':'root', 'database':'myDB', 'charset':"utf8"}
     # conn = connect(host='localhost', user="root", password='root', database='myDB', charset="utf8")
     # cursor = conn.cursor()
-    pool = PooledDB(**address)
+    # pool = PooledDB(**address)
     initDate()
+    sichuan_value = []
     #new_value_list = value_list[:99]
+    for sichuan_item in sichuan:
+        if sichuan_item in key_list:
+            sichuan_value.append(city_dict[sichuan_item])
     thread_list = []
-    for value_item in value_list:
+    for value_item in sichuan_value:
         thread = MyThread(value_item)
         thread_list.append(thread)
 
