@@ -169,7 +169,7 @@ def insertData(conn,cursor,from_station):
             url = "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=%s"%(trip_date, from_station, value_item, "ADULT")
             result_list = query_train_info(url,key_list,value_list)
             if len(result_list)>0:
-                print(result_list)
+                # print(result_list)
                 for item in result_list:
                     # writer.writerow({'车次': item[0], '出发点': item[1],'目的地':item[2],'开车时间':item[3],'到达时间':item[4],'消耗时间':item[5],'一等座':item[6],'二等座':item[7],'软卧':item[8], '硬卧':item[9], '硬座':item[10], '无座':item[11]})
                     sql_command = 'insert into trainticks(carname,fromstation,tostation,fromtime,totime,taketime,firstseat,secondseat,softbed,hardbed,hardseat,noseat)values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\");'%(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11])
@@ -196,6 +196,119 @@ def insertData(conn,cursor,from_station):
             cursor.close()
             conn.close()
             print("closed successfully.")
+
+
+def insertDataByTimeAndFromSttion(conn,cursor,from_station,starttime,endtime):
+    try:
+        global key_list
+        global value_list
+        global trip_date
+        cursor = conn.cursor()
+        # file = open('./file/names.csv', 'w')
+        # fieldnames = ['车次', '出发点', '目的地', '开车时间', '到达时间', '消耗时间', '一等座',
+        #               '二等座', '软卧', '硬卧', '硬座', '无座']
+        # writer = csv.DictWriter(file, fieldnames=fieldnames)
+        # writer.writeheader()
+        starttime_float = float(starttime.replace(":","."))
+        endtime_float = float(endtime.replace(":","."))
+        print(len(value_list))
+        for value_item in value_list:
+            # print(value_item)
+            url = "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=%s"%(trip_date, from_station, value_item, "ADULT")
+            result_list = query_train_info(url,key_list,value_list)
+            if len(result_list)>0:
+                # print(result_list)
+                for item in result_list:
+                    item_float = float(item[3].replace(":", "."))
+                    # print(str(starttime_float))
+                    # print("startime" + str(starttime_float) + "===endtime" + str(endtime_float) + "====itemfloat" + str(
+                    #     item_float))
+                    # writer.writerow({'车次': item[0], '出发点': item[1],'目的地':item[2],'开车时间':item[3],'到达时间':item[4],'消耗时间':item[5],'一等座':item[6],'二等座':item[7],'软卧':item[8], '硬卧':item[9], '硬座':item[10], '无座':item[11]})
+                    if ((item_float<=endtime_float) and (item_float >= starttime_float)):
+                        print("startime" + str(starttime_float) + "===endtime" + str(
+                            endtime_float) + "====itemfloat" + str(item_float))
+                        sql_command = 'insert into trainticks(carname,fromstation,tostation,fromtime,totime,taketime,firstseat,secondseat,softbed,hardbed,hardseat,noseat)values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\");'%(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11])
+                        print(sql_command)
+                        try:
+                            result = cursor.execute(sql_command)
+                            insert_id = conn.insert_id()
+                            conn.commit()
+                            if result:
+                                print("插入成功", insert_id)
+                        except pymysql.Error as e:
+                            print("发生异常，无法插入数据")
+                            conn.rollback()
+                            # 主键唯一，无法插入
+                            if "key 'PRIMARY'" in e.args[1]:
+                                print("数据已存在，未插入数据")
+                            else:
+                                print("插入数据失败，原因 %d: %s" % (e.args[0], e.args[1]))
+                result_list = []
+
+
+    finally:
+        if 'conn' in dir() and callable(conn) and conn.open:
+            cursor.close()
+            conn.close()
+            print("closed successfully.")
+
+
+def insertDataByTimeAndToSttion(conn, cursor, to_station, starttime, endtime):
+    try:
+        global key_list
+        global value_list
+        global trip_date
+        cursor = conn.cursor()
+        # file = open('./file/names.csv', 'w')
+        # fieldnames = ['车次', '出发点', '目的地', '开车时间', '到达时间', '消耗时间', '一等座',
+        #               '二等座', '软卧', '硬卧', '硬座', '无座']
+        # writer = csv.DictWriter(file, fieldnames=fieldnames)
+        # writer.writeheader()
+        starttime_float = float(starttime.replace(":", "."))
+        endtime_float = float(endtime.replace(":", "."))
+        print(len(value_list))
+        for value_item in value_list:
+            # print(value_item)
+            url = "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=%s" % (
+            trip_date, value_item, to_station, "ADULT")
+            result_list = query_train_info(url, key_list, value_list)
+            if len(result_list) > 0:
+                # print(result_list)
+                for item in result_list:
+                    item_float = float(item[4].replace(":", "."))
+                    # writer.writerow({'车次': item[0], '出发点': item[1],'目的地':item[2],'开车时间':item[3],'到达时间':item[4],'消耗时间':item[5],'一等座':item[6],'二等座':item[7],'软卧':item[8], '硬卧':item[9], '硬座':item[10], '无座':item[11]})
+                    # print("startime" + str(starttime_float) + "===endtime" + str(endtime_float) + "====itemfloat" + str(
+                    #     item_float))
+                    if ((item_float <= endtime_float) and (item_float>=starttime_float)):
+                        print("startime"+str(starttime_float)+"===endtime"+str(endtime_float)+"====itemfloat"+str(item_float))
+                        sql_command = 'insert into trainticks(carname,fromstation,tostation,fromtime,totime,taketime,firstseat,secondseat,softbed,hardbed,hardseat,noseat)values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\");' % (
+                        item[0], item[1], item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9],
+                        item[10], item[11])
+                        print(sql_command)
+                        try:
+                            result = cursor.execute(sql_command)
+                            insert_id = conn.insert_id()
+                            conn.commit()
+                            if result:
+                                print("插入成功", insert_id)
+                        except pymysql.Error as e:
+                            print("发生异常，无法插入数据")
+                            conn.rollback()
+                            # 主键唯一，无法插入
+                            if "key 'PRIMARY'" in e.args[1]:
+                                print("数据已存在，未插入数据")
+                            else:
+                                print("插入数据失败，原因 %d: %s" % (e.args[0], e.args[1]))
+                result_list = []
+
+
+    finally:
+        if 'conn' in dir() and callable(conn) and conn.open:
+            cursor.close()
+            conn.close()
+            print("closed successfully.")
+
+
 def initDate():
     global city_dict
     global key_list
@@ -235,20 +348,33 @@ def main():
     # cursor = conn.cursor()
     # pool = PooledDB(**address)
     initDate()
-    sichuan_value = []
-    #new_value_list = value_list[:99]
-    for sichuan_item in sichuan:
-        if sichuan_item in key_list:
-            sichuan_value.append(city_dict[sichuan_item])
-    thread_list = []
-    for value_item in sichuan_value:
-        thread = MyThread(value_item)
-        thread_list.append(thread)
-
-    for thread_item in thread_list:
-        thread_item.start()
-        print("线程开始")
-        print(Thread.name)
+    # sichuan_value = []
+    # #new_value_list = value_list[:99]
+    # for sichuan_item in sichuan:
+    #     if sichuan_item in key_list:
+    #         sichuan_value.append(city_dict[sichuan_item])
+    # thread_list = []
+    # for value_item in sichuan_value:
+    #     thread = MyThread(value_item)
+    #     thread_list.append(thread)
+    #
+    # for thread_item in thread_list:
+    #     thread_item.start()
+    #     print("线程开始")
+    #     print(Thread.name)
+    start_time = input("请输入开始的时间:")
+    end_time = input("请输入结束的时间:")
+    station = input("请输入要监控的站点:")
+    conn1 = connect(**address)
+    cursor1 = conn1.cursor()
+    # def insertDataByTimeAndFromSttion(conn, cursor, from_station, starttime, endtime, station)
+    from_thread = Thread(target=insertDataByTimeAndFromSttion,args=(conn1, cursor1,city_dict[station],start_time,end_time))
+    from_thread.start()
+    conn2 = connect(**address)
+    cursor2 = conn2.cursor()
+    # def insertDataByTimeAndToSttion(conn, cursor, to_station, starttime, endtime):
+    to_thread = Thread(target=insertDataByTimeAndToSttion,args=(conn2,cursor2,city_dict[station],start_time,end_time))
+    to_thread.start()
 
     # while True:
     #     print("子线程数量"+str(Thread.active_count()))
