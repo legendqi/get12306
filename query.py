@@ -30,7 +30,7 @@ def query_train_info(url,key_list,value_list):
 
     info_list = []
     try:
-        r = requests.get(url, verify=False,timeout=9)
+        r = requests.get(url,verify=False,timeout=60)
         # 获取返回的json数据里的data字段的result结果
         raw_trains = r.json()['data']['result']
         if len(raw_trains)>0:
